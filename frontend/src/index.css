@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Venturizer Design Tokens — from design.md */
+:root {
+  /* Brand Colors */
+  --color-blue: #1F4294;        /* Venturizer Blue — primary */
+  --color-coral: #F2403D;       /* Momentum Coral — CTA / Hot bucket */
+  --color-ink: #16213A;         /* Deep Ink — body text */
+  --color-paper: #FAF8F4;       /* Warm Paper — page background */
+  --color-sage: #3F8F6F;        /* Sage Confirm — valid / Good bucket */
+  --color-amber: #D98E3F;       /* Soft Amber — guidance / Maybe bucket */
+  --color-slate: #8B93A6;       /* Muted Slate — Low bucket / disabled */
+
+  /* Neutrals */
+  --color-white: #FFFFFF;
+  --color-border: #EDEAE3;
+  --color-hairline: #C9C4B8;
+  --color-caption: #594F45;
+
+  /* Spacing (8px grid) */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
+
+  /* Radii */
+  --radius-card: 14px;
+  --radius-btn: 10px;
+  --radius-tag: 6px;
+
+  /* Shadow */
+  --shadow-card: 0 4px 16px rgba(22, 33, 58, 0.08);
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: 'IBM Plex Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Google Fonts — loaded in index.html */
