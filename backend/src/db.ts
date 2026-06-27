@@ -17,6 +17,8 @@ export async function testDbConnection(): Promise<void> {
 // ── pg Pool (used by API routes — persistent TCP connection, proper pooling) ─
 let _pool: Pool | null = null;
 
+import bcrypt from 'bcryptjs';
+
 export function getPool(): Pool {
   if (_pool) return _pool;
   const url = process.env.DATABASE_URL;
@@ -30,3 +32,30 @@ export function getPool(): Pool {
   });
   return _pool;
 }
+
+/**
+ * Ensures at least one admin user exists in the database.
+ */
+export async function bootstrapAdminUser(): Promise<void> {
+  const pool = getPool();
+  try {
+    const { rows } = await pool.query('SELECT COUNT(*)::int AS count FROM admin_users');
+    if (rows[0].count === 0) {
+      console.log('🌱 Seeding default administrator...');
+      const email = 'admin@venturizer.co';
+      const name = 'Administrator';
+      const password = 'Password123';
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(password, salt);
+
+      await pool.query(
+        'INSERT INTO admin_users (email, password_hash, name) VALUES ($1, $2, $3)',
+        [email, hash, name]
+      );
+      console.log(`   ✅ Default admin created: ${email} / ${password}`);
+    }
+  } catch (err: any) {
+    console.error('⚠️ Failed to bootstrap admin user:', err.message);
+  }
+}
+

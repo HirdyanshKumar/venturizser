@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import AdminDashboard from './AdminDashboard';
 
 interface Question {
   id: string;
@@ -38,6 +39,22 @@ function App() {
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [completed, setCompleted] = useState<boolean>(false);
+
+  // ── Lightweight popstate Router ──
+  const [path, setPath] = useState<string>(window.location.pathname);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
+
+  const navigate = (newPath: string) => {
+    window.history.pushState(null, '', newPath);
+    setPath(newPath);
+  };
 
   // ── Start Flow ──────────────────────────────────────────────────────────────
   const startFlow = async (type: 'founder' | 'investor') => {
@@ -199,6 +216,11 @@ function App() {
     ? (currentQuestion.order_index / currentQuestion.total_questions) * 100
     : 0;
 
+  // Intercept and render Admin Dashboard if route matches
+  if (path.startsWith('/admin')) {
+    return <AdminDashboard navigate={navigate} />;
+  }
+
   // Render Start Screen
   if (!flowType || !currentQuestion) {
     return (
@@ -262,8 +284,11 @@ function App() {
           </div>
         </main>
 
-        <footer className="text-center text-xs text-brand-caption max-w-4xl mx-auto w-full border-t border-brand-border pt-4">
-          Venturizer Lead Intake &bull; Automated Scoring & Triage
+        <footer className="text-center text-xs text-brand-caption max-w-4xl mx-auto w-full border-t border-brand-border pt-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+          <span>Venturizer Lead Intake &bull; Automated Triage</span>
+          <button onClick={() => navigate('/admin')} className="text-brand-blue font-semibold hover:underline cursor-pointer">
+            Admin ERP Portal &rarr;
+          </button>
         </footer>
       </div>
     );

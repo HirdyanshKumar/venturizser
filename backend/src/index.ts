@@ -2,8 +2,9 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import { testDbConnection } from './db';
+import { testDbConnection, bootstrapAdminUser } from './db';
 import sessionsRouter from './routes/sessions';
+import adminRouter from './routes/admin';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -48,11 +49,15 @@ app.get('/health', async (_req, res) => {
 // Public chatbot API — rate-limited
 app.use('/sessions', publicLimiter, sessionsRouter);
 
+// Admin dashboard API
+app.use('/admin', adminRouter);
+
 // ── Start ──────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`✅  Venturizer backend running on http://localhost:${PORT}`);
   console.log(`    GET  http://localhost:${PORT}/health`);
   console.log(`    POST http://localhost:${PORT}/sessions`);
+  await bootstrapAdminUser();
 });
 
 export default app;
