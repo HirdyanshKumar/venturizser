@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface Question {
   id: string;
@@ -338,7 +338,7 @@ function App() {
           ></div>
         </div>
 
-        <div className="p-8 md:p-10">
+        <div key={currentQuestion.id} className="p-8 md:p-10 animate-fade-in-up">
           <div className="flex items-center gap-2 mb-6">
             <span className="text-xs font-mono uppercase px-2 py-0.5 bg-brand-paper border border-brand-border rounded-tag" style={{ color: 'var(--color-brand-caption)' }}>
               Step {currentQuestion.order_index} of {currentQuestion.total_questions}
@@ -439,8 +439,8 @@ function App() {
 
           {/* Validation Error Message */}
           {errorMsg && (
-            <div className="mb-6 p-4 bg-amber-50 border border-brand-amber/30 rounded-[10px] text-sm text-brand-ink flex items-start gap-2 animate-fade-in">
-              <svg className="w-5 h-5 text-brand-amber shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+            <div className="mb-6 p-4 bg-red-50 border border-brand-coral/20 rounded-[10px] text-sm text-brand-coral flex items-start gap-2.5 id-validation-error animate-fade-in">
+              <svg className="w-5 h-5 text-brand-coral shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <span>{errorMsg}</span>
