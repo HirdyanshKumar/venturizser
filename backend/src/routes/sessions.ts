@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { getPool } from '../db';
 import { validateQuestionAnswer } from '../utils/validation';
+import { scoreLead } from '../utils/scoring';
 
 const router = Router();
 
@@ -237,14 +238,37 @@ router.post('/:id/complete', async (req: Request, res: Response): Promise<void> 
     return;
   }
 
-  // ── Stub: scoring / AI / email will be added here in Phases 5–7 ──
+  // ── Calculate Score & Bucket (Phase 5) ──
+  const { rows: respRows } = await pool.query(
+    `SELECT question_key, answer FROM responses WHERE lead_id = $1`,
+    [id]
+  );
+  
+  const answers: Record<string, any> = {};
+  for (const row of respRows) {
+    answers[row.question_key] = row.answer;
+  }
+
+  const scoringResult = scoreLead(lead.flow_type as 'founder' | 'investor', answers);
+
+  // Persist score, bucket, and breakdown to leads
+  await pool.query(
+    `UPDATE leads
+     SET score = $1, bucket = $2, score_breakdown = $3::jsonb
+     WHERE id = $4`,
+    [scoringResult.score, scoringResult.bucket, JSON.stringify(scoringResult.breakdown), id]
+  );
+
   res.json({
     ok: true,
     session_id: id,
     flow_type: lead.flow_type,
     total_answered: lastIdx,
     total_questions: total,
-    message: 'Session received. Scoring and outreach queued (Phases 5–7).',
+    score: scoringResult.score,
+    bucket: scoringResult.bucket,
+    breakdown: scoringResult.breakdown,
+    message: 'Session completed. Score computed and saved successfully.',
   });
 });
 
