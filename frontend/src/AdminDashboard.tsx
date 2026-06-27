@@ -455,9 +455,11 @@ export default function AdminDashboard({ navigate }: AdminDashboardProps) {
                   </div>
 
                   {lead.ai_summary && (
-                    <p className="text-sm text-brand-caption line-clamp-3 mb-4 leading-relaxed bg-brand-paper/50 p-3 rounded-tag border border-brand-border/40">
-                      {lead.ai_summary}
-                    </p>
+                    <div className="bg-brand-paper/50 p-3.5 rounded-tag border border-brand-border/40 mb-4">
+                      <p className="text-sm text-brand-caption leading-relaxed">
+                        {lead.ai_summary}
+                      </p>
+                    </div>
                   )}
 
                   <div className="flex items-center justify-between border-t border-brand-border/50 pt-3 text-[10px] font-mono text-brand-caption">

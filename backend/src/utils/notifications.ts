@@ -82,6 +82,9 @@ export async function sendBucketEmail(payload: EmailPayload): Promise<boolean> {
       break;
   }
 
+  console.log(`📧 Attempting to send email via Resend to: ${to}...`);
+  console.log(`   [Resend Payload] From: ${fromEmail}, Subject: "${subject}"`);
+
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -97,15 +100,19 @@ export async function sendBucketEmail(payload: EmailPayload): Promise<boolean> {
       }),
     });
 
+    const responseText = await res.text();
+    console.log(`📧 Resend API Response Code: ${res.status}`);
+    console.log(`📧 Resend API Response Body: ${responseText}`);
+
     if (!res.ok) {
-      const errText = await res.text();
-      console.warn(`⚠️ Resend API returned error (Sandbox limit or invalid domain): ${errText}`);
+      console.warn(`⚠️ Resend API returned error: ${res.status} - ${responseText}`);
       return false;
     }
 
+    console.log(`📧 Resend Email sent successfully to ${to}.`);
     return true;
   } catch (err: any) {
-    console.error('❌ Failed to send email via Resend:', err.message);
+    console.error('❌ Resend email invocation failed with exception:', err.stack || err);
     return false;
   }
 }
@@ -141,6 +148,8 @@ export async function sendDiscordHotAlert(
     ],
   };
 
+  console.log(`👾 Attempting to post to Discord webhook: ${webhookUrl.substring(0, 40)}...`);
+
   try {
     const res = await fetch(webhookUrl, {
       method: 'POST',
@@ -148,14 +157,21 @@ export async function sendDiscordHotAlert(
       body: JSON.stringify(payload),
     });
 
+    const responseText = await res.text();
+    console.log(`👾 Discord webhook response code: ${res.status}`);
+    if (responseText) {
+      console.log(`👾 Discord webhook response body: ${responseText}`);
+    }
+
     if (!res.ok) {
-      console.warn(`⚠️ Discord webhook returned HTTP ${res.status}: ${await res.text()}`);
+      console.warn(`⚠️ Discord webhook returned HTTP ${res.status}: ${responseText}`);
       return false;
     }
 
+    console.log('👾 Discord webhook notification posted successfully.');
     return true;
   } catch (err: any) {
-    console.error('❌ Failed to fire Discord webhook alert:', err.message);
+    console.error('❌ Discord webhook invocation failed with exception:', err.stack || err);
     return false;
   }
 }

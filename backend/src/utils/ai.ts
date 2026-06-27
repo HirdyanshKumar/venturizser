@@ -77,33 +77,52 @@ You MUST respond with a JSON object matching this exact format:
   "clarification_question": "string"
 }`;
 
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: qaBlock },
-      ],
-      temperature: 0.2,
-      max_tokens: 800,
-    }),
-  });
+  console.log(`🤖 Invoking Groq Chat Completion API with model 'llama-3.3-70b-versatile'...`);
+  console.log(`   [Groq Prompt Length] System: ${systemPrompt.length} chars, User QA Block: ${qaBlock.length} chars`);
 
-  if (!response.ok) {
-    throw new Error(`Groq API returned HTTP ${response.status}: ${await response.text()}`);
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: qaBlock },
+        ],
+        temperature: 0.2,
+        max_tokens: 800,
+      }),
+    });
+
+    console.log(`🤖 Groq API HTTP response code: ${response.status}`);
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Groq API returned HTTP ${response.status}: ${errText}`);
+    }
+
+    const payload = (await response.json()) as any;
+    const content = payload?.choices?.[0]?.message?.content;
+    console.log(`🤖 Groq content response payload:`, content);
+
+    if (!content) {
+      throw new Error('Empty choices/content from Groq');
+    }
+
+    const parsed = JSON.parse(content) as AIAnalysisResult;
+    console.log(`🤖 Successfully parsed Groq response:`, {
+      summaryLength: parsed.summary?.length,
+      tagsCount: parsed.tags?.length,
+      flagsCount: parsed.flags?.length,
+      clarificationQuestion: !!parsed.clarification_question,
+    });
+    return parsed;
+  } catch (err: any) {
+    console.error('❌ Groq API invocation or parse failed:', err.stack || err);
+    throw err;
   }
-
-  const payload = (await response.json()) as any;
-  const content = payload?.choices?.[0]?.message?.content;
-  if (!content) {
-    throw new Error('Empty response from Groq');
-  }
-
-  return JSON.parse(content) as AIAnalysisResult;
 }

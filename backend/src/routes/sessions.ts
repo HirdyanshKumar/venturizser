@@ -281,7 +281,7 @@ router.post('/:id/complete', async (req: Request, res: Response): Promise<void> 
     aiFlags = aiAnalysis.flags;
     clarificationQuestion = aiAnalysis.clarification_question || '';
   } catch (err: any) {
-    console.error('⚠️ AI analysis failed or timed out, falling back to empty fields:', err.message);
+    console.error('⚠️ AI analysis failed or timed out, falling back to empty fields:', err.stack || err);
   }
 
   const updatedBreakdown = {
@@ -340,7 +340,7 @@ router.post('/:id/complete', async (req: Request, res: Response): Promise<void> 
     );
 
   } catch (err: any) {
-    console.error('❌ Failed to run communication automations:', err.message);
+    console.error('❌ Failed to run communication automations with exception:', err.stack || err);
   }
 
   res.json({
