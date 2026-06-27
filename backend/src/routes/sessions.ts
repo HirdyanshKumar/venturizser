@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { getPool } from '../db';
+import { validateQuestionAnswer } from '../utils/validation';
 
 const router = Router();
 
@@ -145,7 +146,7 @@ router.post('/:id/answer', async (req: Request, res: Response): Promise<void> =>
 
   // Verify question belongs to this session's flow
   const { rows: qRows } = await pool.query(
-    `SELECT id, key, flow_type, order_index FROM questions WHERE id = $1`,
+    `SELECT id, key, flow_type, order_index, input_type, validation, options FROM questions WHERE id = $1`,
     [question_id]
   );
   if (qRows.length === 0 || qRows[0].flow_type !== lead.flow_type) {
@@ -155,20 +156,33 @@ router.post('/:id/answer', async (req: Request, res: Response): Promise<void> =>
 
   const q = qRows[0];
 
+  // Validate answer against database configurations
+  const validationResult = validateQuestionAnswer(q.input_type, q.validation, q.options, answer);
+  if (!validationResult.success) {
+    res.status(422).json({
+      error: 'Validation failed',
+      field: q.key,
+      message: validationResult.error,
+    });
+    return;
+  }
+
+  const validatedAnswer = validationResult.data;
+
   // Upsert response
   await pool.query(
     `INSERT INTO responses (lead_id, question_id, question_key, answer)
      VALUES ($1, $2, $3, $4::jsonb)
      ON CONFLICT (lead_id, question_id) DO UPDATE SET answer = EXCLUDED.answer`,
-    [id, question_id, q.key, JSON.stringify(answer)]
+    [id, question_id, q.key, JSON.stringify(validatedAnswer)]
   );
 
   // Denormalise name + email onto the lead row for fast dashboard queries
   if (q.key === 'founder_name' || q.key === 'investor_name') {
-    await pool.query(`UPDATE leads SET name = $1 WHERE id = $2`, [String(answer), id]);
+    await pool.query(`UPDATE leads SET name = $1 WHERE id = $2`, [String(validatedAnswer), id]);
   }
   if (q.key === 'founder_email' || q.key === 'investor_email') {
-    await pool.query(`UPDATE leads SET email = $1 WHERE id = $2`, [String(answer), id]);
+    await pool.query(`UPDATE leads SET email = $1 WHERE id = $2`, [String(validatedAnswer), id]);
   }
 
   // Return next question
