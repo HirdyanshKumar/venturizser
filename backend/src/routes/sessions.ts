@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { getPool } from '../db';
 import { validateQuestionAnswer } from '../utils/validation';
 import { scoreLead } from '../utils/scoring';
+import { getWeakestCategory, analyzeLeadWithAI } from '../utils/ai';
 
 const router = Router();
 
@@ -240,23 +241,68 @@ router.post('/:id/complete', async (req: Request, res: Response): Promise<void> 
 
   // ── Calculate Score & Bucket (Phase 5) ──
   const { rows: respRows } = await pool.query(
-    `SELECT question_key, answer FROM responses WHERE lead_id = $1`,
+    `SELECT r.question_key, r.answer, q.text AS question_text
+     FROM responses r
+     JOIN questions q ON q.id = r.question_id
+     WHERE r.lead_id = $1
+     ORDER BY q.order_index`,
     [id]
   );
   
   const answers: Record<string, any> = {};
+  const qaList: { question: string; answer: any }[] = [];
   for (const row of respRows) {
     answers[row.question_key] = row.answer;
+    qaList.push({ question: row.question_text, answer: row.answer });
   }
 
   const scoringResult = scoreLead(lead.flow_type as 'founder' | 'investor', answers);
 
-  // Persist score, bucket, and breakdown to leads
+  // ── AI Analysis (Phase 6) ──
+  let aiSummary = '';
+  let aiTags: string[] = [];
+  let aiFlags: string[] = [];
+  let clarificationQuestion = '';
+
+  try {
+    if (req.headers['x-break-groq']) {
+      throw new Error('Simulated Groq API failure via header.');
+    }
+    const weakestCategory = getWeakestCategory(scoringResult.breakdown);
+    const aiAnalysis = await analyzeLeadWithAI(
+      lead.flow_type as 'founder' | 'investor',
+      qaList,
+      weakestCategory
+    );
+    
+    aiSummary = aiAnalysis.summary;
+    aiTags = aiAnalysis.tags;
+    aiFlags = aiAnalysis.flags;
+    clarificationQuestion = aiAnalysis.clarification_question || '';
+  } catch (err: any) {
+    console.error('⚠️ AI analysis failed or timed out, falling back to empty fields:', err.message);
+  }
+
+  const updatedBreakdown = {
+    ...scoringResult.breakdown,
+    clarification_question: clarificationQuestion || undefined
+  };
+
+  // Persist score, bucket, breakdown, and AI fields to leads
   await pool.query(
     `UPDATE leads
-     SET score = $1, bucket = $2, score_breakdown = $3::jsonb
-     WHERE id = $4`,
-    [scoringResult.score, scoringResult.bucket, JSON.stringify(scoringResult.breakdown), id]
+     SET score = $1, bucket = $2, score_breakdown = $3::jsonb,
+         ai_summary = $4, ai_tags = $5, ai_flags = $6
+     WHERE id = $7`,
+    [
+      scoringResult.score,
+      scoringResult.bucket,
+      JSON.stringify(updatedBreakdown),
+      aiSummary || null,
+      aiTags.length > 0 ? aiTags : null,
+      aiFlags.length > 0 ? aiFlags : null,
+      id
+    ]
   );
 
   res.json({
@@ -267,8 +313,13 @@ router.post('/:id/complete', async (req: Request, res: Response): Promise<void> 
     total_questions: total,
     score: scoringResult.score,
     bucket: scoringResult.bucket,
-    breakdown: scoringResult.breakdown,
-    message: 'Session completed. Score computed and saved successfully.',
+    breakdown: updatedBreakdown,
+    ai: {
+      summary: aiSummary || null,
+      tags: aiTags,
+      flags: aiFlags
+    },
+    message: 'Session completed. Score and AI analysis saved successfully.',
   });
 });
 
