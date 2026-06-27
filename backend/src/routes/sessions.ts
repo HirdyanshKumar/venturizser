@@ -3,6 +3,7 @@ import { getPool } from '../db';
 import { validateQuestionAnswer } from '../utils/validation';
 import { scoreLead } from '../utils/scoring';
 import { getWeakestCategory, analyzeLeadWithAI } from '../utils/ai';
+import { sendBucketEmail, sendDiscordHotAlert } from '../utils/notifications';
 
 const router = Router();
 
@@ -305,6 +306,43 @@ router.post('/:id/complete', async (req: Request, res: Response): Promise<void> 
     ]
   );
 
+  // ── Trigger Automations (Phase 7) ──
+  let emailSent = false;
+  let alertSent = false;
+
+  try {
+    const emailToUse = answers['founder_email'] || answers['investor_email'] || lead.email;
+    const nameToUse = answers['founder_name'] || answers['investor_name'] || lead.name || 'Applicant';
+
+    if (emailToUse) {
+      emailSent = await sendBucketEmail({
+        to: emailToUse,
+        name: nameToUse,
+        score: scoringResult.score,
+        bucket: scoringResult.bucket,
+        clarificationQuestion,
+      });
+    }
+
+    if (scoringResult.bucket === 'hot') {
+      alertSent = await sendDiscordHotAlert(
+        nameToUse,
+        lead.flow_type,
+        scoringResult.score,
+        aiSummary
+      );
+    }
+
+    // Update sent status in database
+    await pool.query(
+      `UPDATE leads SET email_sent = $1, alert_sent = $2 WHERE id = $3`,
+      [emailSent, alertSent, id]
+    );
+
+  } catch (err: any) {
+    console.error('❌ Failed to run communication automations:', err.message);
+  }
+
   res.json({
     ok: true,
     session_id: id,
@@ -319,7 +357,11 @@ router.post('/:id/complete', async (req: Request, res: Response): Promise<void> 
       tags: aiTags,
       flags: aiFlags
     },
-    message: 'Session completed. Score and AI analysis saved successfully.',
+    automations: {
+      email_sent: emailSent,
+      discord_alert_sent: alertSent
+    },
+    message: 'Session completed. Score, AI analysis, and automations executed successfully.',
   });
 });
 
