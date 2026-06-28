@@ -11,6 +11,7 @@ interface Lead {
   status: 'new' | 'contacted' | 'review' | 'closed';
   ai_summary: string | null;
   ai_tags: string[] | null;
+  ai_flags?: string[] | null;
   email_sent: boolean;
   alert_sent: boolean;
   created_at: string;
@@ -303,19 +304,7 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const labels: Record<string, string> = {
-      new: 'New Intake',
-      contacted: 'Contacted',
-      review: 'In Review',
-      closed: 'Closed',
-    };
-    return (
-      <span className="inline-block px-2 py-0.5 border border-brand-border bg-brand-paper text-[10px] font-bold rounded-tag uppercase tracking-wider text-brand-caption">
-        {labels[status] || status}
-      </span>
-    );
-  };
+
 
   // Render Login Screen if not authenticated
   if (!token) {
@@ -388,7 +377,7 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
       
       {/* ERP Header */}
       <header className="sticky top-0 bg-white border-b border-brand-border z-20" style={{ boxShadow: 'var(--shadow-card)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div 
               onClick={() => { setSelectedLeadId(null); setFlowFilter('all'); setBucketFilter('all'); setStatusFilter('all'); setSearchQuery(''); }}
@@ -430,10 +419,10 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
       </header>
 
       {/* Main ERP Layout */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col gap-6">
         
-        {/* Left Side: Filter Bar + Cards List (lg:col-span-7) */}
-        <div className="lg:col-span-7 flex flex-col gap-6">
+        {/* Filter Bar + Cards List */}
+        <div className="flex flex-col gap-6">
           
           {/* Controls Bar */}
           <div className="bg-white p-6 rounded-card border border-brand-border flex flex-col gap-4" style={{ boxShadow: 'var(--shadow-card)' }}>
@@ -472,10 +461,10 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
                   className="w-full p-2 border border-brand-border bg-white rounded-btn text-xs"
                 >
                   <option value="all">All Buckets</option>
-                  <option value="hot">🔥 Hot</option>
-                  <option value="good">✅ Good</option>
-                  <option value="maybe">🟡 Maybe</option>
-                  <option value="low">⚪ Low</option>
+                  <option value="hot">Hot</option>
+                  <option value="good">Good</option>
+                  <option value="maybe">Maybe</option>
+                  <option value="low">Low</option>
                 </select>
               </div>
 
@@ -518,34 +507,60 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
                     setSelectedLeadId(lead.id);
                     navigate(`/admin/leads/${lead.id}`);
                   }}
-                  className={`p-6 rounded-card bg-white border cursor-pointer hover:border-brand-blue transition-all ${
+                  className={`p-5 bg-white rounded-card border cursor-pointer hover:-translate-y-0.5 transition-all select-none ${
                     selectedLeadId === lead.id ? 'border-brand-blue ring-1 ring-brand-blue' : 'border-brand-border'
                   }`}
                   style={{ boxShadow: 'var(--shadow-card)' }}
                 >
-                  <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="font-bold text-lg text-brand-ink leading-snug">{lead.name || 'Incomplete Applicant'}</h3>
-                      <p className="text-xs text-brand-caption font-mono mt-0.5">{lead.email || 'no-email-collected'}</p>
+                      <h3 className="font-bold text-brand-ink text-base leading-snug">{lead.name || 'Anonymous Applicant'}</h3>
+                      <p className="text-xs text-brand-caption mt-0.5">{lead.email}</p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-                      {lead.meeting_status === 'scheduled' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-tag text-xs font-bold uppercase">
-                          📅 Scheduled
-                        </span>
-                      )}
-                      {getBucketBadge(lead.bucket)}
-                      {getStatusBadge(lead.status)}
+                    <div className="flex gap-2">
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-tag uppercase ${
+                        lead.flow_type === 'founder' ? 'bg-blue-50 text-brand-blue border border-brand-blue/10' : 'bg-purple-50 text-indigo-700 border border-indigo-100'
+                      }`}>
+                        {lead.flow_type}
+                      </span>
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-tag uppercase ${
+                        lead.bucket === 'hot' ? 'bg-red-50 text-brand-coral border border-brand-coral/10' :
+                        lead.bucket === 'good' ? 'bg-green-50 text-brand-sage border border-brand-sage/10' :
+                        lead.bucket === 'maybe' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                        'bg-slate-100 text-slate-600 border border-slate-200'
+                      }`}>
+                        {lead.bucket}
+                      </span>
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-tag uppercase ${
+                        lead.status === 'new' ? 'bg-sky-50 text-sky-700 border border-sky-100' :
+                        lead.status === 'contacted' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                        lead.status === 'review' ? 'bg-emerald-50 text-brand-sage border border-brand-sage/10' :
+                        'bg-slate-100 text-slate-600 border border-slate-200'
+                      }`}>
+                        {lead.status === 'review' ? 'in review' : lead.status}
+                      </span>
                     </div>
                   </div>
 
-                  {lead.ai_summary && (
-                    <div className="bg-brand-paper/50 p-3.5 rounded-tag border border-brand-border/40 mb-4">
-                      <p className="text-sm text-brand-caption leading-relaxed">
-                        {lead.ai_summary}
-                      </p>
-                    </div>
-                  )}
+                  <p className="text-xs text-brand-ink/90 line-clamp-2 leading-relaxed mb-4">{lead.ai_summary}</p>
+
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {lead.meeting_status === 'scheduled' && (
+                      <span className="px-2 py-0.5 bg-brand-coral/10 text-brand-coral border border-brand-coral/10 text-[9px] font-bold rounded-tag flex items-center gap-1 uppercase tracking-wider">
+                        📅 Scheduled
+                      </span>
+                    )}
+                    {lead.ai_tags && lead.ai_tags.map((tag: string) => (
+                      <span key={tag} className="px-2 py-0.5 bg-brand-paper border border-brand-border text-[9px] font-semibold text-brand-caption rounded-tag">
+                        {tag}
+                      </span>
+                    ))}
+                    {lead.ai_flags && lead.ai_flags.map((flag: string) => (
+                      <span key={flag} className="px-2 py-0.5 bg-red-50/50 border border-red-100 text-[9px] font-semibold text-brand-coral rounded-tag">
+                        ⚠️ {flag}
+                      </span>
+                    ))}
+                  </div>
 
                   <div className="flex items-center justify-between border-t border-brand-border/50 pt-3 text-[10px] font-mono text-brand-caption">
                     <span>Score: <strong className="text-brand-blue text-sm">{lead.score || 0}/100</strong></span>
@@ -557,64 +572,87 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
           </div>
         </div>
 
-        {/* Right Side: Lead Details Panel (lg:col-span-5) */}
-        <div className="lg:col-span-5 lg:sticky lg:top-24 h-fit">
-          {!selectedLeadId ? (
-            <div className="bg-white p-8 rounded-card border border-brand-border border-dashed text-center text-brand-caption" style={{ boxShadow: 'var(--shadow-card)' }}>
-              <svg className="w-12 h-12 mx-auto text-brand-border mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+      </div>
+
+      {/* Modal Overlay for Lead Details */}
+      {selectedLeadId && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => {
+            setSelectedLeadId(null);
+            navigate('/admin');
+          }}
+        >
+          <div 
+            className="bg-white rounded-card border border-brand-border overflow-hidden max-h-[90vh] w-full max-w-3xl flex flex-col shadow-2xl relative animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button in top-right */}
+            <button 
+              onClick={() => {
+                setSelectedLeadId(null);
+                navigate('/admin');
+              }}
+              className="absolute top-4 right-4 text-brand-caption hover:text-brand-ink transition-colors cursor-pointer z-50 p-2 rounded-full hover:bg-brand-paper"
+              aria-label="Close details"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <h3 className="font-bold text-brand-ink text-lg mb-1">Triage Details Panel</h3>
-              <p className="text-sm">Select an applicant card from the triage list to inspect score breakdown, AI summaries, and full question/answer transcripts.</p>
-            </div>
-          ) : detailLoading ? (
-            <div className="bg-white p-8 rounded-card border border-brand-border text-center text-brand-caption" style={{ boxShadow: 'var(--shadow-card)' }}>
-              <p className="text-sm animate-pulse">Retrieving vault details...</p>
-            </div>
-          ) : !leadDetail ? (
-            <div className="bg-white p-8 rounded-card border border-brand-border text-center text-red-500" style={{ boxShadow: 'var(--shadow-card)' }}>
-              <p className="text-sm">Lead details could not be found.</p>
-            </div>
-          ) : (
-            <div className="bg-white rounded-card border border-brand-border overflow-hidden max-h-[85vh] flex flex-col" style={{ boxShadow: 'var(--shadow-card)' }}>
-              
-              {/* Detail Header */}
-              <div className="p-6 border-b border-brand-border bg-brand-paper/50">
-                <div className="flex justify-between items-start mb-2">
-                  <h2 className="text-2xl font-bold text-brand-ink leading-tight font-display" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    {leadDetail.lead.name || 'Anonymous Applicant'}
-                  </h2>
-                  <button 
-                    onClick={() => {
-                      setSelectedLeadId(null);
-                      navigate('/admin');
-                    }}
-                    className="text-brand-caption hover:text-brand-ink text-sm p-1 border rounded cursor-pointer"
-                  >
-                    Close
-                  </button>
-                </div>
-                <p className="text-xs text-brand-caption font-mono mb-4">{leadDetail.lead.email || 'No email collected'}</p>
-                
-                {/* Workflow Status Dropdown Control */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 bg-white border border-brand-border rounded-btn">
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider text-brand-caption">Pipeline Stage</label>
-                    <span className="text-xs font-semibold text-brand-ink">Triage Status</span>
-                  </div>
-                  <select
-                    disabled={statusUpdateLoading}
-                    value={leadDetail.lead.status}
-                    onChange={(e) => updateStatus(e.target.value)}
-                    className="p-1.5 border border-brand-border rounded bg-brand-paper font-semibold text-xs cursor-pointer focus:outline-none"
-                  >
-                    <option value="new">New Intake</option>
-                    <option value="contacted">Contacted</option>
-                    <option value="review">In Review</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                </div>
+            </button>
+
+            {detailLoading ? (
+              <div className="p-12 text-center text-brand-caption flex-1 flex flex-col justify-center">
+                <p className="text-sm animate-pulse">Retrieving vault details...</p>
               </div>
+            ) : !leadDetail ? (
+              <div className="p-12 text-center text-red-500 flex-1 flex flex-col justify-center">
+                <p className="text-sm">Lead details could not be found.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col flex-1 overflow-hidden">
+                {/* Detail Header */}
+                <div className="p-6 border-b border-brand-border bg-brand-paper/50 pr-16 flex-shrink-0">
+                  <div className="flex justify-between items-start mb-2">
+                    <h2 className="text-2xl font-bold text-brand-ink leading-tight font-display" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      {leadDetail.lead.name || 'Anonymous Applicant'}
+                    </h2>
+                  </div>
+                  <p className="text-xs text-brand-caption font-mono mb-4">{leadDetail.lead.email || 'No email collected'}</p>
+                  
+                  {/* Workflow Status Dropdown Control */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 bg-white border border-brand-border rounded-btn">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold uppercase text-brand-caption">Pipeline Stage:</span>
+                      <select
+                        disabled={statusUpdateLoading}
+                        value={leadDetail.lead.status}
+                        onChange={(e) => updateStatus(e.target.value)}
+                        className="p-1.5 border border-brand-border bg-white rounded text-xs font-semibold focus:outline-none focus:border-brand-blue"
+                      >
+                        <option value="new">New Intake</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="review">In Review</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold uppercase text-brand-caption">Priority Bucket:</span>
+                      <span className={`px-2.5 py-1 text-xs font-bold rounded-tag flex items-center gap-1.5 ${
+                        leadDetail.lead.bucket === 'hot' ? 'bg-red-50 text-brand-coral border border-brand-coral/20' :
+                        leadDetail.lead.bucket === 'good' ? 'bg-green-50 text-brand-sage border border-brand-sage/20' :
+                        leadDetail.lead.bucket === 'maybe' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                        'bg-slate-50 text-slate-500 border border-slate-200'
+                      }`}>
+                        {leadDetail.lead.bucket === 'hot' ? '🔥 Hot' :
+                         leadDetail.lead.bucket === 'good' ? '✅ Good' :
+                         leadDetail.lead.bucket === 'maybe' ? '🟡 Maybe' :
+                         '⚪ Low'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
               {/* Scrollable details */}
               <div className="p-6 overflow-y-auto space-y-6 flex-1">
@@ -730,16 +768,16 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
                       onChange={(e) => setEmailTemplate(e.target.value)}
                       className="w-full p-2 border border-brand-border bg-white rounded-btn text-xs"
                     >
-                      {leadDetail.lead.bucket === 'hot' && (
+                      {['hot', 'good', 'maybe', 'low'].includes(leadDetail.lead.bucket) && (
                         <option value="hot">Hot Template (Includes Cal.com link)</option>
                       )}
-                      {leadDetail.lead.bucket === 'good' && (
+                      {['good', 'maybe', 'low'].includes(leadDetail.lead.bucket) && (
                         <option value="good">Good Template (Under review notice)</option>
                       )}
-                      {leadDetail.lead.bucket === 'maybe' && (
+                      {['maybe', 'low'].includes(leadDetail.lead.bucket) && (
                         <option value="maybe">Maybe Template (Follow-up clarification question)</option>
                       )}
-                      {leadDetail.lead.bucket === 'low' && (
+                      {['low'].includes(leadDetail.lead.bucket) && (
                         <option value="low">Low Template (Rejection notice)</option>
                       )}
                       <option value="custom">Custom Email (Plain Text)</option>
@@ -820,12 +858,12 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
                 </div>
 
               </div>
-
             </div>
           )}
+          </div>
         </div>
+      )}
 
-      </div>
     </div>
   );
 }
