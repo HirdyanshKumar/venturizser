@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { getPool } from '../db';
+import { sendBucketEmail } from '../utils/notifications';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-venturizer';
@@ -118,7 +119,7 @@ router.get('/leads', requireAdminAuth, async (req: AuthenticatedRequest, res: Re
 
   try {
     const query = `
-      SELECT id, flow_type, name, email, score, bucket, status, ai_summary, ai_tags, email_sent, alert_sent, created_at
+      SELECT id, flow_type, name, email, score, bucket, status, ai_summary, ai_tags, email_sent, alert_sent, meeting_status, meeting_link, meeting_scheduled_at, created_at
       FROM leads
       ${whereClause}
       ORDER BY created_at DESC
@@ -139,7 +140,7 @@ router.get('/leads/:id', requireAdminAuth, async (req: AuthenticatedRequest, res
 
   try {
     const { rows: leadRows } = await pool.query(
-      `SELECT id, flow_type, name, email, score, bucket, status, score_breakdown, ai_summary, ai_tags, ai_flags, email_sent, alert_sent, created_at
+      `SELECT id, flow_type, name, email, score, bucket, status, score_breakdown, ai_summary, ai_tags, ai_flags, email_sent, alert_sent, meeting_status, meeting_link, meeting_scheduled_at, communication_logs, created_at
        FROM leads WHERE id = $1`,
       [id]
     );
@@ -163,6 +164,82 @@ router.get('/leads/:id', requireAdminAuth, async (req: AuthenticatedRequest, res
       lead: leadRows[0],
       responses: qaRows,
     });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── POST /admin/leads/:id/send-email ──────────────────────────────────────────
+// Manual email dispatch endpoint
+router.post('/leads/:id/send-email', requireAdminAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const id = req.params.id as string;
+  const { templateType, customMessage } = req.body as { templateType?: string; customMessage?: string };
+
+  if (!templateType || !['hot', 'good', 'maybe', 'low', 'custom'].includes(templateType)) {
+    res.status(400).json({ error: 'Invalid template type. Choose "hot", "good", "maybe", "low", or "custom".' });
+    return;
+  }
+
+  if (templateType === 'custom' && (!customMessage || customMessage.trim() === '')) {
+    res.status(400).json({ error: 'Custom message body is required for custom template.' });
+    return;
+  }
+
+  const pool = getPool();
+
+  try {
+    // 1. Fetch lead details
+    const { rows: leadRows } = await pool.query(
+      `SELECT id, name, email, score, bucket FROM leads WHERE id = $1`,
+      [id]
+    );
+
+    if (leadRows.length === 0) {
+      res.status(404).json({ error: 'Lead not found.' });
+      return;
+    }
+
+    const lead = leadRows[0];
+
+    if (!lead.email) {
+      res.status(400).json({ error: 'Lead does not have an email address associated.' });
+      return;
+    }
+
+    // 2. Send email via helper
+    const success = await sendBucketEmail({
+      to: lead.email,
+      name: lead.name || 'Applicant',
+      score: lead.score || 0,
+      bucket: lead.bucket || 'low',
+      templateOverride: templateType,
+      customMessage: customMessage,
+      leadId: lead.id,
+    });
+
+    if (!success) {
+      res.status(500).json({ error: 'Failed to send email. Check API configuration.' });
+      return;
+    }
+
+    // 3. Update database: communication_logs, email_sent, and status to contacted
+    const logEntry = {
+      template: templateType,
+      timestamp: new Date().toISOString(),
+      message: templateType === 'custom' ? customMessage : `Sent ${templateType} template email`,
+    };
+
+    await pool.query(
+      `UPDATE leads 
+       SET communication_logs = COALESCE(communication_logs, '[]'::jsonb) || $1::jsonb,
+           status = 'contacted',
+           email_sent = true,
+           updated_at = now()
+       WHERE id = $2`,
+      [JSON.stringify([logEntry]), id]
+    );
+
+    res.json({ ok: true, message: 'Email dispatched successfully.' });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
