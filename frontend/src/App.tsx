@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminDashboard from './AdminDashboard';
+import { getApiUrl } from './utils/api';
 
 interface Question {
   id: string;
@@ -61,7 +62,7 @@ function App() {
     setLoading(true);
     setErrorMsg('');
     try {
-      const res = await fetch('/api/sessions', {
+      const res = await fetch(getApiUrl('/api/sessions'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ flow_type: type }),
@@ -111,7 +112,7 @@ function App() {
     setErrorMsg('');
 
     try {
-      const res = await fetch(`/api/sessions/${sessionId}/answer`, {
+      const res = await fetch(getApiUrl(`/api/sessions/${sessionId}/answer`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -150,7 +151,7 @@ function App() {
   const triggerCompletion = async () => {
     if (!sessionId) return;
     try {
-      const res = await fetch(`/api/sessions/${sessionId}/complete`, {
+      const res = await fetch(getApiUrl(`/api/sessions/${sessionId}/complete`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });

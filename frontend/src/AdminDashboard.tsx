@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiUrl } from './utils/api';
 
 interface Lead {
   id: string;
@@ -79,7 +80,7 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
     e.preventDefault();
     setLoginError('');
     try {
-      const res = await fetch('/api/admin/login', {
+      const res = await fetch(getApiUrl('/api/admin/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -119,7 +120,7 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
       if (statusFilter !== 'all') queryParams.append('status', statusFilter);
       if (searchQuery.trim() !== '') queryParams.append('search', searchQuery);
 
-      const res = await fetch(`/api/admin/leads?${queryParams.toString()}`, {
+      const res = await fetch(getApiUrl(`/api/admin/leads?${queryParams.toString()}`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -152,7 +153,7 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
     setDetailLoading(true);
     setErrorMsg('');
     try {
-      const res = await fetch(`/api/admin/leads/${id}`, {
+      const res = await fetch(getApiUrl(`/api/admin/leads/${id}`), {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -205,7 +206,7 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
     if (!token || !selectedLeadId || !leadDetail) return;
     setStatusUpdateLoading(true);
     try {
-      const res = await fetch(`/api/admin/leads/${selectedLeadId}/status`, {
+      const res = await fetch(getApiUrl(`/api/admin/leads/${selectedLeadId}/status`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -241,7 +242,7 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
     setEmailSuccess(false);
     setEmailError('');
     try {
-      const res = await fetch(`/api/admin/leads/${selectedLeadId}/send-email`, {
+      const res = await fetch(getApiUrl(`/api/admin/leads/${selectedLeadId}/send-email`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
