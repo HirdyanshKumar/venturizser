@@ -322,7 +322,8 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
     return (
       <div className="min-h-screen flex items-center justify-center bg-brand-paper px-4">
         <div className="max-w-md w-full bg-white p-8 rounded-card border border-brand-border" style={{ boxShadow: 'var(--shadow-card)' }}>
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 flex flex-col items-center">
+            <img src="/logo.webp" alt="Venturizer Logo" className="h-12 w-auto object-contain mb-4" />
             <h2 className="text-3xl font-bold text-brand-blue font-display" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Venturizer VC
             </h2>
@@ -389,13 +390,18 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
       <header className="sticky top-0 bg-white border-b border-brand-border z-20" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 
+            <div 
               onClick={() => { setSelectedLeadId(null); setFlowFilter('all'); setBucketFilter('all'); setStatusFilter('all'); setSearchQuery(''); }}
-              className="font-bold text-xl text-brand-blue cursor-pointer tracking-tight" 
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              className="flex items-center gap-2 cursor-pointer"
             >
-              Venturizer ERP
-            </h1>
+              <img src="/logo.webp" alt="Venturizer Logo" className="h-8 w-auto object-contain" />
+              <span 
+                className="font-bold text-xl text-brand-blue tracking-tight" 
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                Venturizer ERP
+              </span>
+            </div>
             <span className="px-2 py-0.5 bg-brand-paper border border-brand-border text-[10px] font-mono rounded text-brand-caption">
               v1.0.0
             </span>

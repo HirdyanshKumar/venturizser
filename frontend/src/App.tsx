@@ -230,10 +230,10 @@ function App() {
       <div className="min-h-screen flex flex-col justify-between py-12 px-4 select-none">
         <header className="max-w-4xl mx-auto w-full">
           <div className="flex items-center gap-2">
+            <img src="/logo.webp" alt="Venturizer Logo" className="h-8 w-auto object-contain" />
             <span className="font-bold text-xl tracking-tight text-brand-blue" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Venturizer
             </span>
-            <div className="w-1.5 h-1.5 rounded-full bg-brand-coral"></div>
           </div>
         </header>
 
@@ -302,9 +302,12 @@ function App() {
     return (
       <div className="min-h-screen flex flex-col justify-between py-12 px-4">
         <header className="max-w-2xl mx-auto w-full">
-          <span className="font-bold text-xl tracking-tight text-brand-blue" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Venturizer
-          </span>
+          <div className="flex items-center gap-2">
+            <img src="/logo.webp" alt="Venturizer Logo" className="h-8 w-auto object-contain" />
+            <span className="font-bold text-xl tracking-tight text-brand-blue" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Venturizer
+            </span>
+          </div>
         </header>
 
         <main className="max-w-2xl mx-auto w-full my-auto text-center bg-white p-12 rounded-card border border-brand-border" style={{ boxShadow: 'var(--shadow-card)' }}>
@@ -345,9 +348,12 @@ function App() {
           </svg>
           Back
         </button>
-        <span className="font-bold text-lg tracking-tight text-brand-blue" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          Venturizer
-        </span>
+        <div className="flex items-center gap-2">
+          <img src="/logo.webp" alt="Venturizer Logo" className="h-6 w-auto object-contain" />
+          <span className="font-bold text-lg tracking-tight text-brand-blue" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Venturizer
+          </span>
+        </div>
       </header>
 
       {/* Main Conversational Box */}
