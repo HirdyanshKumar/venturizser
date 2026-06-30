@@ -230,7 +230,14 @@ function App() {
       <div className="min-h-screen flex flex-col justify-between py-12 px-4 select-none">
         <header className="max-w-4xl mx-auto w-full">
           <div className="flex items-center">
-            <img src="/logo.webp" alt="Venturizer Logo" className="h-8 w-auto object-contain" />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded bg-brand-blue text-white font-bold text-lg font-display">
+                D
+              </div>
+              <span className="font-bold text-xl text-brand-blue tracking-tight font-display">
+                DealFlow <span className="text-brand-coral">AI</span>
+              </span>
+            </div>
           </div>
         </header>
 
@@ -285,7 +292,7 @@ function App() {
         </main>
 
         <footer className="text-center text-xs text-brand-caption max-w-4xl mx-auto w-full border-t border-brand-border pt-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-          <span>Venturizer Lead Intake &bull; Automated Triage</span>
+          <span>DealFlow AI Lead Intake &bull; Automated Triage</span>
           <button onClick={() => navigate('/admin')} className="text-brand-blue font-semibold hover:underline cursor-pointer">
             Admin ERP Portal &rarr;
           </button>
@@ -300,7 +307,14 @@ function App() {
       <div className="min-h-screen flex flex-col justify-between py-12 px-4">
         <header className="max-w-2xl mx-auto w-full">
           <div className="flex items-center">
-            <img src="/logo.webp" alt="Venturizer Logo" className="h-8 w-auto object-contain" />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded bg-brand-blue text-white font-bold text-lg font-display">
+                D
+              </div>
+              <span className="font-bold text-xl text-brand-blue tracking-tight font-display">
+                DealFlow <span className="text-brand-coral">AI</span>
+              </span>
+            </div>
           </div>
         </header>
 
@@ -343,7 +357,14 @@ function App() {
           Back
         </button>
         <div className="flex items-center">
-          <img src="/logo.webp" alt="Venturizer Logo" className="h-6 w-auto object-contain" />
+          <div className="flex items-center gap-1.5">
+            <div className="flex items-center justify-center w-6 h-6 rounded bg-brand-blue text-white font-bold text-xs font-display">
+              D
+            </div>
+            <span className="font-bold text-md text-brand-blue tracking-tight font-display">
+              DealFlow <span className="text-brand-coral">AI</span>
+            </span>
+          </div>
         </div>
       </header>
 

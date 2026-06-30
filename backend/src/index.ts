@@ -64,7 +64,7 @@ app.use('/webhooks', webhooksRouter);
 
 // ── Start ──────────────────────────────────────────────────────────────────────
 app.listen(PORT, async () => {
-  console.log(`✅  Venturizer backend running on http://localhost:${PORT}`);
+  console.log(`✅  DealFlow AI backend running on http://localhost:${PORT}`);
   console.log(`    GET  http://localhost:${PORT}/health`);
   console.log(`    POST http://localhost:${PORT}/sessions`);
   await bootstrapAdminUser();

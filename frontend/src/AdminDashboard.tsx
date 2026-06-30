@@ -47,7 +47,7 @@ interface AdminDashboardProps {
 
 export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboardProps) {
   // ── Auth States ─────────────────────────────────────────────────────────────
-  const [token, setToken] = useState<string | null>(localStorage.getItem('venturizer_token'));
+  const [token, setToken] = useState<string | null>(localStorage.getItem('dealflow_token'));
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loginError, setLoginError] = useState<string>('');
@@ -88,7 +88,7 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
       });
       const data = await res.json();
       if (res.ok) {
-        localStorage.setItem('venturizer_token', data.token);
+        localStorage.setItem('dealflow_token', data.token);
         setToken(data.token);
         setEmail('');
         setPassword('');
@@ -102,7 +102,7 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
 
   // ── Logout Action ───────────────────────────────────────────────────────────
   const handleLogout = () => {
-    localStorage.removeItem('venturizer_token');
+    localStorage.removeItem('dealflow_token');
     setToken(null);
     setLeads([]);
     setSelectedLeadId(null);
@@ -312,7 +312,14 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
       <div className="min-h-screen flex items-center justify-center bg-brand-paper px-4">
         <div className="max-w-md w-full bg-white p-8 rounded-card border border-brand-border" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="text-center mb-8 flex flex-col items-center">
-            <img src="/logo.webp" alt="Venturizer Logo" className="h-12 w-auto object-contain mb-4" />
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded bg-brand-blue text-white font-bold text-2xl font-display">
+                D
+              </div>
+              <span className="font-bold text-3xl text-brand-blue tracking-tight font-display">
+                DealFlow <span className="text-brand-coral">AI</span>
+              </span>
+            </div>
             <h2 className="text-3xl font-bold text-brand-blue font-display" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               VC Admin Portal
             </h2>
@@ -328,7 +335,7 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 border border-brand-border rounded-btn focus:outline-none focus:border-brand-blue"
-                placeholder="admin@venturizer.co"
+                placeholder="admin@dealflow.ai"
               />
             </div>
 
@@ -383,7 +390,14 @@ export default function AdminDashboard({ navigate, initialLeadId }: AdminDashboa
               onClick={() => { setSelectedLeadId(null); setFlowFilter('all'); setBucketFilter('all'); setStatusFilter('all'); setSearchQuery(''); }}
               className="flex items-center gap-2 cursor-pointer"
             >
-              <img src="/logo.webp" alt="Venturizer Logo" className="h-8 w-auto object-contain" />
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center w-8 h-8 rounded bg-brand-blue text-white font-bold text-lg font-display">
+                  D
+                </div>
+                <span className="font-bold text-xl text-brand-blue tracking-tight font-display">
+                  DealFlow <span className="text-brand-coral">AI</span>
+                </span>
+              </div>
               <span 
                 className="font-bold text-xl text-brand-blue tracking-tight" 
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}

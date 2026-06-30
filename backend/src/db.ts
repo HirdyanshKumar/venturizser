@@ -42,7 +42,7 @@ export async function bootstrapAdminUser(): Promise<void> {
     const { rows } = await pool.query('SELECT COUNT(*)::int AS count FROM admin_users');
     if (rows[0].count === 0) {
       console.log('🌱 Seeding default administrator...');
-      const email = 'admin@venturizer.co';
+      const email = 'admin@dealflow.ai';
       const name = 'Administrator';
       const password = 'Password123';
       const salt = await bcrypt.genSalt(10);

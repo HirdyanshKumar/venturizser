@@ -25,74 +25,74 @@ export async function sendBucketEmail(payload: EmailPayload): Promise<boolean> {
   let subject = '';
   let html = '';
 
-  const fromEmail = process.env.EMAIL_FROM || 'hello@venturizer.co';
+  const fromEmail = process.env.EMAIL_FROM || 'hello@dealflow.ai';
   const activeTemplate = templateOverride || bucket;
 
-  const calUrl = process.env.CALCOM_EVENT_URL || 'https://cal.com/hirdyansh-kumar-venturizer/30min';
+  const calUrl = process.env.CALCOM_EVENT_URL || 'https://cal.com/hirdyansh-kumar/30min';
 
   if (activeTemplate === 'custom') {
-    subject = 'Update regarding your Venturizer application';
+    subject = 'Update regarding your DealFlow AI application';
     html = `
       <div style="font-family: sans-serif; line-height: 1.5; color: #16213a;">
         <h2>Hi ${name},</h2>
         <div style="white-space: pre-wrap; margin: 20px 0; font-size: 15px; color: #16213a; font-family: sans-serif;">${customMessage || ''}</div>
-        <p>Best regards,<br/>The Venturizer Team</p>
+        <p>Best regards,<br/>The DealFlow AI Team</p>
       </div>
     `;
   } else {
     switch (activeTemplate) {
       case 'hot':
-        subject = 'Your application to Venturizer - Next Steps';
+        subject = 'Your application to DealFlow AI - Next Steps';
         html = `
           <div style="font-family: sans-serif; line-height: 1.5; color: #16213a;">
             <h2 style="color: #1f4294;">Hi ${name},</h2>
-            <p>Thank you for submitting your details to Venturizer.</p>
+            <p>Thank you for submitting your details to DealFlow AI.</p>
             <p>We are thrilled to let you know that your profile fits our investment criteria perfectly! We would love to schedule an introductory call to discuss program details.</p>
             <p><strong>Please book a slot directly on our calendar here:</strong></p>
             <p><a href="${calUrl}?metadata[leadId]=${leadId || ''}" style="display: inline-block; padding: 10px 20px; background-color: #f2403d; color: white; text-decoration: none; border-radius: 10px; font-weight: bold;">Book Call Slot</a></p>
-            <p>Best regards,<br/>The Venturizer Team</p>
+            <p>Best regards,<br/>The DealFlow AI Team</p>
           </div>
         `;
         break;
 
       case 'good':
-        subject = 'Your application to Venturizer';
+        subject = 'Your application to DealFlow AI';
         html = `
           <div style="font-family: sans-serif; line-height: 1.5; color: #16213a;">
             <h2>Hi ${name},</h2>
             <p>Thank you for sharing details about your startup.</p>
             <p>We have received your responses and our investment team is currently reviewing them. We will get back to you with next steps within the next 3-5 business days.</p>
-            <p>Best regards,<br/>The Venturizer Team</p>
+            <p>Best regards,<br/>The DealFlow AI Team</p>
           </div>
         `;
         break;
 
       case 'maybe':
-        subject = 'Follow-up regarding your Venturizer application';
+        subject = 'Follow-up regarding your DealFlow AI application';
         html = `
           <div style="font-family: sans-serif; line-height: 1.5; color: #16213a;">
             <h2>Hi ${name},</h2>
-            <p>Thank you for applying to Venturizer.</p>
+            <p>Thank you for applying to DealFlow AI.</p>
             <p>We reviewed your responses and had a quick follow-up question to help us better evaluate fit:</p>
             <blockquote style="border-left: 4px solid #d98e3f; padding-left: 15px; margin: 20px 0; color: #594f45; font-style: italic;">
               "${clarificationQuestion || 'Could you elaborate on your current traction metrics?'}"
             </blockquote>
             <p>Simply reply directly to this email with your thoughts and we will continue the review.</p>
-            <p>Best regards,<br/>The Venturizer Team</p>
+            <p>Best regards,<br/>The DealFlow AI Team</p>
           </div>
         `;
         break;
 
       case 'low':
       default:
-        subject = 'Your application to Venturizer';
+        subject = 'Your application to DealFlow AI';
         html = `
           <div style="font-family: sans-serif; line-height: 1.5; color: #16213a;">
             <h2>Hi ${name},</h2>
-            <p>Thank you for taking the time to share your details with Venturizer.</p>
+            <p>Thank you for taking the time to share your details with DealFlow AI.</p>
             <p>After reviewing your responses, we regret to inform you that we are unable to proceed with your application at this time as it does not align with our current investment focus.</p>
             <p>We wish you the absolute best in your startup journey.</p>
-            <p>Best regards,<br/>The Venturizer Team</p>
+            <p>Best regards,<br/>The DealFlow AI Team</p>
           </div>
         `;
         break;
@@ -111,7 +111,7 @@ export async function sendBucketEmail(payload: EmailPayload): Promise<boolean> {
         'accept': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'Venturizer', email: fromEmail },
+        sender: { name: 'DealFlow AI', email: fromEmail },
         to: [{ email: to, name: name }],
         subject: subject,
         htmlContent: html,

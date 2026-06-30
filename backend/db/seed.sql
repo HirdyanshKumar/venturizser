@@ -1,4 +1,4 @@
--- Venturizer Seed Data
+-- DealFlow AI Seed Data
 -- Questions ordered easy → hard per flow.md
 -- Run after schema.sql
 

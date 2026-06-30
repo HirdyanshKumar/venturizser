@@ -5,7 +5,7 @@ import { getPool } from '../db';
 import { sendBucketEmail } from '../utils/notifications';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-venturizer';
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-dealflow';
 
 // Extends Express request interface to hold authenticated user
 export interface AuthenticatedRequest extends Request {

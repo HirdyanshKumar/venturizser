@@ -60,7 +60,7 @@ export async function analyzeLeadWithAI(
     .map((item, idx) => `Q${idx + 1}: ${item.question}\nA${idx + 1}: ${JSON.stringify(item.answer)}`)
     .join('\n\n');
 
-  const systemPrompt = `You are a venture capitalist investment analyst at Venturizer.
+  const systemPrompt = `You are a venture capitalist investment analyst evaluating startup dealflow.
 Analyze the following application responses from a ${flowType}.
 
 Produce a JSON response containing:

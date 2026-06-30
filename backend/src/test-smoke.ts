@@ -101,12 +101,12 @@ function runTests() {
   // ── Test 4: JWT Signing and Verification ──
   try {
     const secret = 'test-secret';
-    const payload = { id: 'admin123', email: 'test@venturizer.co', name: 'Tester' };
+    const payload = { id: 'admin123', email: 'test@dealflow.ai', name: 'Tester' };
     const token = jwt.sign(payload, secret, { expiresIn: '1h' });
     
     const decoded = jwt.verify(token, secret) as typeof payload;
     assert(decoded.id === 'admin123', 'JWT decoded user ID should match payload');
-    assert(decoded.email === 'test@venturizer.co', 'JWT decoded email should match payload');
+    assert(decoded.email === 'test@dealflow.ai', 'JWT decoded email should match payload');
   } catch (err: any) {
     assert(false, `JWT test failed: ${err.message}`);
   }

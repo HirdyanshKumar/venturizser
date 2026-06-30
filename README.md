@@ -1,7 +1,6 @@
-# Venturizer — AI-Powered Lead Triage Engine
+# DealFlow AI — Automated VC Lead Triage Engine
 
-> **Internship Assignment | Full-Stack Development Track**
-> Converts 500+ monthly inbound enquiries from founders and investors into a scored, triaged, automated pipeline — so the team only spends time on judgment calls, not data entry.
+Converts inbound enquiries from founders and investors into a scored, triaged, automated pipeline — enabling venture capital funds to scale their lead evaluation and focus on high-conviction startups.
 
 ---
 
@@ -23,7 +22,7 @@
 
 ## Overview
 
-Venturizer receives inbound enquiries from startup founders and institutional investors. Before this system, every enquiry was read manually — a process that does not scale and delays response to high-quality leads.
+DealFlow AI is an automated lead generation and qualification platform built for venture capital funds. Instead of manually reading and routing every startup pitch or investor enquiry, this system provides an end-to-end automated pipeline.
 
 This project replaces manual triage with:
 
@@ -266,14 +265,14 @@ Authenticate an admin user and receive a JWT token.
 
 **Request body:**
 ```json
-{ "email": "admin@venturizer.co", "password": "Password123" }
+{ "email": "admin@dealflow.ai", "password": "Password123" }
 ```
 
 **Response `200`:**
 ```json
 {
   "token": "eyJhbGci...",
-  "admin": { "id": "uuid", "email": "admin@venturizer.co", "name": "Administrator" }
+  "admin": { "id": "uuid", "email": "admin@dealflow.ai", "name": "Administrator" }
 }
 ```
 
@@ -407,7 +406,7 @@ npm run dev
 ```
 
 The server will automatically seed a default admin user on first start:
-- **Email:** `admin@venturizer.co`
+- **Email:** `admin@dealflow.ai`
 - **Password:** `Password123`
 
 > Change this password after your first login.

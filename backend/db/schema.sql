@@ -1,4 +1,4 @@
--- Venturizer Schema
+-- DealFlow AI Schema
 -- Apply with: ts-node db/migrate.ts
 
 -- ── Extensions ────────────────────────────────────────────────
